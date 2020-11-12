@@ -1,7 +1,7 @@
 <template>
   <div>
     <input v-model="searchQuery">
-    <button @click="fetchMovies(searchQuery)" :disabled="searchQuery === ''">
+    <button @click="newSearch" :disabled="searchQuery === ''">
       Search movies
     </button>
     <div v-if="fetching">
@@ -11,8 +11,21 @@
       {{ query.error }}
     </div>
     <div v-else class="hello">
-      <h1>movies</h1>
-      <div class="movie" v-for="movie in sortedByYearMovies" :key="movie.imdbID">
+      <div v-if="sortedMovies.length">
+        <button
+          :class="{ 'active': sorting === 'year' }"
+          @click="sorting = 'year'"
+        >
+          Sort by year
+        </button>
+        <button
+          :class="{ 'active': sorting === 'title' }"
+          @click="sorting = 'title'"
+        >
+          Sort by title
+        </button>
+      </div>
+      <div class="movie" v-for="movie in sortedMovies" :key="movie.imdbID">
         <div>
           <span class="property-name">Title: </span>
           <span>{{ movie.Title }}</span>
@@ -27,9 +40,9 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import useFetchMovies from '@/api/movies'
-import { useSortMoviesByYear } from '@/use/sortMovies'
+import { useSortMoviesByYear, useSortMoviesByTitle } from '@/use/sortMovies'
 
 export default {
   props: {
@@ -37,15 +50,34 @@ export default {
   },
   setup () {
     const searchQuery = ref('')
+    const sorting = ref('')
     const { movies, fetching, fetchMovies, query } = useFetchMovies()
     const { sortedByYearMovies } = useSortMoviesByYear(movies)
+    const { sortedByTitleMovies } = useSortMoviesByTitle(movies)
+
+    const sortedMovies = computed(() => {
+      if (sorting.value === 'year') {
+        return sortedByYearMovies.value
+      } else if (sorting.value === 'title') {
+        return sortedByTitleMovies.value
+      } else {
+        return movies.value
+      }
+    })
 
     return {
       searchQuery,
-      sortedByYearMovies,
+      sorting,
+      sortedMovies,
       fetching,
       fetchMovies,
       query
+    }
+  },
+  methods: {
+    newSearch () {
+      this.fetchMovies(this.searchQuery)
+      this.sorting = ''
     }
   }
 }
@@ -74,5 +106,8 @@ li {
 }
 a {
   color: #42b983;
+}
+button.active {
+  border: 2px solid greenyellow;
 }
 </style>

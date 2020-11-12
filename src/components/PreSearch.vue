@@ -18,7 +18,6 @@ export default {
   },
   setup (props) {
     const { fetchMovies, movies } = useFetchMovies()
-    console.log(props.query)
     fetchMovies(props.query)
     return {
       movies
