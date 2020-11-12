@@ -12,7 +12,7 @@
     </div>
     <div v-else class="hello">
       <h1>movies</h1>
-      <div class="movie" v-for="movie in movies" :key="movie.imdbID">
+      <div class="movie" v-for="movie in sortedByYearMovies" :key="movie.imdbID">
         <div>
           <span class="property-name">Title: </span>
           <span>{{ movie.Title }}</span>
@@ -28,7 +28,8 @@
 
 <script>
 import { ref } from 'vue'
-import useFetchMovies from '@/api/movies.js'
+import useFetchMovies from '@/api/movies'
+import { useSortMoviesByYear } from '@/use/sortMovies'
 
 export default {
   props: {
@@ -37,10 +38,11 @@ export default {
   setup () {
     const searchQuery = ref('')
     const { movies, fetching, fetchMovies, query } = useFetchMovies()
+    const { sortedByYearMovies } = useSortMoviesByYear(movies)
 
     return {
       searchQuery,
-      movies,
+      sortedByYearMovies,
       fetching,
       fetchMovies,
       query
